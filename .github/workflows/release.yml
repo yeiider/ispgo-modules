@@ -26,6 +26,8 @@ jobs:
 
       - name: Armar el paquete
         id: pkg
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           tag="${{ inputs.tag || github.ref_name }}"
           echo "tag=${tag}" >> "$GITHUB_OUTPUT"
@@ -34,6 +36,12 @@ jobs:
           test -f "${dir}/module.json" || { echo "No existe ${dir}/module.json"; exit 1; }
           key=$(jq -r .key "${dir}/module.json")
           test "$(jq -r .version "${dir}/module.json")" = "${version}" || { echo "${dir}/module.json no dice la versión ${version}"; exit 1; }
+          # Una versión publicada no se reemplaza: la huella cambiaría y las
+          # instancias que la usan dejarían de instalarla. Sube la versión.
+          if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            echo "La versión ${tag} ya está publicada. Sube \"version\" en ${dir}/module.json y usa una etiqueta nueva."
+            exit 1
+          fi
           file="${key}-${version}.zip"
           (cd "${dir}" && zip -qr "../${file}" module.json src routes database ui)
           sha=$(sha256sum "${file}" | cut -d' ' -f1)
