@@ -1,7 +1,7 @@
 {
     "key": "demo-notas",
     "name": "Notas (módulo de prueba)",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Módulo de terceros de prueba: notas internas por cliente, con su propia interfaz.",
     "provider": "Acme\\DemoNotas\\DemoNotasServiceProvider",
     "core": "^2.0",

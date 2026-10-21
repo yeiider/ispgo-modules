@@ -1,7 +1,8 @@
 ;(async function () {
   const $ = (id) => document.getElementById(id)
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c])
-  const name = (c) => `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim()
+  const title = (s) => String(s ?? "").replace(/(^|\s)\S/g, (m) => m.toUpperCase())
+  const name = (c) => title(`${c.first_name ?? ""} ${c.last_name ?? ""}`.trim())
 
   let ispgo
   try {
@@ -35,17 +36,25 @@
       : `<li class="muted">Todavía no hay notas.</li>`
   }
 
-  let timer
-  $("search").addEventListener("input", () => {
-    clearTimeout(timer)
-    timer = setTimeout(async () => {
+  // Los primeros clientes salen al abrir; al escribir se busca por nombre o cédula.
+  async function searchCustomers() {
+    $("error").textContent = ""
+    try {
       const list = await ispgo.api("customers", { query: { q: $("search").value } })
       list.forEach((c) => customers.set(String(c.id), c))
       $("customer").innerHTML =
-        `<option value="">Sin cliente</option>` +
+        `<option value="">${list.length ? "Sin cliente" : "Sin resultados"}</option>` +
         list.map((c) => `<option value="${c.id}">${esc(name(c))} · ${esc(c.identity_document)}</option>`).join("")
-      if (list.length) $("customer").value = String(list[0].id)
-    }, 300)
+      if (list.length && $("search").value) $("customer").value = String(list[0].id)
+    } catch (e) {
+      $("error").textContent = `No se pudieron buscar clientes: ${e.message}`
+    }
+  }
+
+  let timer
+  $("search").addEventListener("input", () => {
+    clearTimeout(timer)
+    timer = setTimeout(searchCustomers, 300)
   })
 
   $("save").addEventListener("click", async () => {
@@ -77,5 +86,5 @@
   })
 
   $("reload").addEventListener("click", loadNotes)
-  await loadNotes()
+  await Promise.all([loadNotes(), searchCustomers()])
 })()
