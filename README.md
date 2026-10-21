@@ -13,7 +13,7 @@ Cada carpeta es un módulo:
 ## Publicar una versión
 
 1. Sube `version` en `<carpeta>/module.json`.
-2. Crea la etiqueta `<carpeta>-v<versión>` y súbela:
+2. Crea la etiqueta `<carpeta>-v<versión>` y súbela (o corre la acción **Release** a mano en Actions con esa etiqueta):
    `git tag demo-notas-v0.1.0 && git push origin demo-notas-v0.1.0`.
 3. La acción **Release** publica `<clave>-<versión>.zip` y deja en las notas
    del release la línea para la instancia:

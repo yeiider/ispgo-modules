@@ -8,6 +8,12 @@ name: Release
 on:
   push:
     tags: ['*-v*']
+  # También a mano desde Actions: crea la etiqueta y el release.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Etiqueta <carpeta>-v<versión>, por ejemplo demo-notas-v0.1.0'
+        required: true
 
 permissions:
   contents: write
@@ -21,7 +27,8 @@ jobs:
       - name: Armar el paquete
         id: pkg
         run: |
-          tag="${GITHUB_REF_NAME}"
+          tag="${{ inputs.tag || github.ref_name }}"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
           dir="${tag%-v*}"
           version="${tag##*-v}"
           test -f "${dir}/module.json" || { echo "No existe ${dir}/module.json"; exit 1; }
@@ -46,5 +53,7 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.pkg.outputs.tag }}
+          target_commitish: ${{ github.sha }}
           files: ${{ steps.pkg.outputs.file }}
           body: ${{ steps.pkg.outputs.notes }}
