@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Notas (módulo de prueba)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <h1>Notas (módulo de prueba)</h1>
+    <p class="muted" id="who">Conectando con IspGo…</p>
+
+    <section class="card">
+      <label for="customer">Cliente (opcional)</label>
+      <div class="row">
+        <input id="search" placeholder="Buscar por nombre o cédula" autocomplete="off" />
+        <select id="customer"><option value="">Sin cliente</option></select>
+      </div>
+      <label for="body" style="margin-top:12px">Nota</label>
+      <textarea id="body" placeholder="Escribe una nota interna"></textarea>
+      <div class="row" style="margin-top:12px; justify-content:flex-end">
+        <span class="error" id="error"></span>
+        <button id="save">Guardar nota</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="row"><strong>Últimas notas</strong><button class="ghost" id="reload">Actualizar</button></div>
+      <ul id="notes"><li class="muted">Cargando…</li></ul>
+    </section>
+  </main>
+  <script src="ispgo-module-sdk.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+    "key": "demo-notas",
+    "name": "Notas (módulo de prueba)",
+    "version": "0.1.0",
+    "description": "Módulo de terceros de prueba: notas internas por cliente, con su propia interfaz.",
+    "provider": "Acme\\DemoNotas\\DemoNotasServiceProvider",
+    "core": "^2.0",
+    "billing": {
+        "type": "free"
+    },
+    "autoload": {
+        "psr-4": {
+            "Acme\\DemoNotas\\": "src/"
+        }
+    },
+    "migrations": "database/migrations",
+    "ui": "ui",
+    "menu": [
+        {
+            "label": "Notas (prueba)",
+            "path": "/m/demo-notas",
+            "icon": "FlaskConical",
+            "order": 900
+        }
+    ]
+}

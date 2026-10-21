@@ -1,0 +1,50 @@
+name: Release
+
+# Cada módulo vive en su carpeta (demo-notas/, ...). Una etiqueta
+# <carpeta>-v<versión> (por ejemplo demo-notas-v0.1.0) arma el paquete .zip
+# de esa carpeta y lo publica como release. La línea para ISPGO_MODULES
+# (URL + huella) queda en las notas del release.
+
+on:
+  push:
+    tags: ['*-v*']
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Armar el paquete
+        id: pkg
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          dir="${tag%-v*}"
+          version="${tag##*-v}"
+          test -f "${dir}/module.json" || { echo "No existe ${dir}/module.json"; exit 1; }
+          key=$(jq -r .key "${dir}/module.json")
+          test "$(jq -r .version "${dir}/module.json")" = "${version}" || { echo "${dir}/module.json no dice la versión ${version}"; exit 1; }
+          file="${key}-${version}.zip"
+          (cd "${dir}" && zip -qr "../${file}" module.json src routes database ui)
+          sha=$(sha256sum "${file}" | cut -d' ' -f1)
+          url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${tag}/${file}"
+          echo "file=${file}" >> "$GITHUB_OUTPUT"
+          {
+            echo 'notes<<EOF'
+            echo "Paquete del módulo \`${key}\` ${version}."
+            echo
+            echo 'Variable para la instancia de IspGo (app, worker y cron):'
+            echo
+            echo '```'
+            echo "ISPGO_MODULES=${url}@sha256:${sha}"
+            echo '```'
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.pkg.outputs.file }}
+          body: ${{ steps.pkg.outputs.notes }}
